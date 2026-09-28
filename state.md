@@ -20,6 +20,10 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 - Added a mock ComfyUI service for local API smoke testing.
 - Added ComfyUI client tests and a mock video workflow.
 - Verified mock API flow: submit video job, receive provider job ID, refresh status to completed.
+- Added in-memory asset catalog support to the job manager.
+- Added API endpoints to list and fetch asset records.
+- Added Wan provider output parsing from ComfyUI history into `AssetRecord`.
+- Verified mock API flow through asset lookup.
 
 ## In Progress
 
@@ -36,7 +40,8 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 - Add real ComfyUI `/prompt`, history, and output retrieval behavior.
 - Expose the working flow through a real MCP server.
 - Add integration tests once a ComfyUI endpoint is available.
-- Map real ComfyUI output files to durable asset records.
+- Download or copy real ComfyUI output files into durable local storage.
+- Preserve original request prompt and generation parameters on asset records.
 
 ## Blockers
 
@@ -51,5 +56,6 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 
 ## Verification
 
-- `.\.venv\Scripts\python.exe -m pytest` passes with 8 tests.
+- `.\.venv\Scripts\python.exe -m pytest` passes with 11 tests.
 - Local smoke test passed using `scripts.mock_comfyui:app` and `workflows/video/mock-video.json`.
+- Smoke test covered `POST /generate/video`, `GET /jobs/{job_id}`, and `GET /assets/{asset_id}`.

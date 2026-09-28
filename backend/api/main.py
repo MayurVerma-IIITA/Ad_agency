@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 
 from backend.config import get_settings
 from backend.jobs import JobManager
-from backend.models import JobRecord, VideoGenerationRequest
+from backend.models import AssetRecord, JobRecord, VideoGenerationRequest
 from backend.providers import build_video_provider
 
 settings = get_settings()
@@ -30,3 +30,16 @@ async def get_job(job_id: str) -> JobRecord:
     if not job:
         raise HTTPException(status_code=404, detail="job not found")
     return job
+
+
+@app.get("/assets", response_model=list[AssetRecord])
+async def list_assets() -> list[AssetRecord]:
+    return await jobs.list_assets()
+
+
+@app.get("/assets/{asset_id}", response_model=AssetRecord)
+async def get_asset(asset_id: str) -> AssetRecord:
+    asset = await jobs.get_asset(asset_id)
+    if not asset:
+        raise HTTPException(status_code=404, detail="asset not found")
+    return asset

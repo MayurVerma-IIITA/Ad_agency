@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from backend.models import JobRecord, JobStatus, VideoGenerationRequest, VideoMode
+from backend.models import AssetRecord, JobRecord, JobStatus, VideoGenerationRequest, VideoMode
 from backend.providers.base import VideoProvider
 
 
@@ -10,6 +10,7 @@ class JobManager:
     def __init__(self, video_provider: VideoProvider) -> None:
         self.video_provider = video_provider
         self._jobs: dict[str, JobRecord] = {}
+        self._assets: dict[str, AssetRecord] = {}
 
     async def submit_video(self, request: VideoGenerationRequest) -> JobRecord:
         queued = JobRecord(request=request)
@@ -42,7 +43,19 @@ class JobManager:
             return job
 
         provider_status = await self.video_provider.get_status(job.provider_job_id)
-        return self._update(job_id, status=provider_status.status, asset_id=provider_status.asset_id)
+        asset_id = job.asset_id
+        if provider_status.status == JobStatus.COMPLETED and not asset_id:
+            asset = await self.video_provider.get_result(job.provider_job_id)
+            self._assets[asset.asset_id] = asset
+            asset_id = asset.asset_id
+
+        return self._update(job_id, status=provider_status.status, asset_id=asset_id)
+
+    async def get_asset(self, asset_id: str) -> AssetRecord | None:
+        return self._assets.get(asset_id)
+
+    async def list_assets(self) -> list[AssetRecord]:
+        return list(self._assets.values())
 
     def _update(self, job_id: str, **changes: object) -> JobRecord:
         job = self._jobs[job_id]

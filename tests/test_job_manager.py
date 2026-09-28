@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from backend.jobs import JobManager
@@ -25,7 +27,14 @@ class FakeVideoProvider(VideoProvider):
         )
 
     async def get_result(self, provider_job_id: str) -> AssetRecord:
-        raise NotImplementedError
+        return AssetRecord(
+            type="video",
+            file_path=Path("comfyui/output/mock-output.mp4"),
+            provider=self.name,
+            model="fake",
+            prompt="cinematic perfume ad",
+            parameters={"provider_job_id": provider_job_id},
+        )
 
 
 @pytest.mark.asyncio
@@ -47,4 +56,33 @@ async def test_refresh_job_updates_completed_status() -> None:
 
     assert refreshed is not None
     assert refreshed.status == JobStatus.COMPLETED
-    assert refreshed.asset_id == "asset_123"
+    assert refreshed.asset_id is not None
+
+
+@pytest.mark.asyncio
+async def test_refresh_job_registers_completed_asset() -> None:
+    manager = JobManager(FakeVideoProvider())
+    job = await manager.submit_video(VideoGenerationRequest(prompt="cinematic perfume ad"))
+
+    refreshed = await manager.refresh_job(job.job_id)
+
+    assert refreshed is not None
+    assert refreshed.asset_id is not None
+    asset = await manager.get_asset(refreshed.asset_id)
+    assert asset is not None
+    assert asset.type == "video"
+    assert asset.file_path == Path("comfyui/output/mock-output.mp4")
+
+
+@pytest.mark.asyncio
+async def test_refresh_job_does_not_duplicate_asset() -> None:
+    manager = JobManager(FakeVideoProvider())
+    job = await manager.submit_video(VideoGenerationRequest(prompt="cinematic perfume ad"))
+
+    first = await manager.refresh_job(job.job_id)
+    second = await manager.refresh_job(job.job_id)
+
+    assert first is not None
+    assert second is not None
+    assert first.asset_id == second.asset_id
+    assert len(await manager.list_assets()) == 1
