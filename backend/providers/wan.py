@@ -11,6 +11,7 @@ from backend.models import ModelRegistryEntry
 from backend.models import AssetRecord, JobRecord, JobStatus, VideoGenerationRequest
 from backend.providers.base import VideoProvider
 from backend.storage import LocalAssetStore
+from backend.workflows import apply_workflow_patches, resolve_workflow_patch_values
 
 
 class WanProvider(VideoProvider):
@@ -107,6 +108,13 @@ class WanProvider(VideoProvider):
             raise ValueError("Wan workflow template is not configured")
 
         workflow = copy.deepcopy(self.workflow_template)
+        patch_config = request.metadata.get("workflow_patches")
+        if patch_config:
+            if not isinstance(patch_config, dict):
+                raise ValueError("metadata.workflow_patches must be an object")
+            patches = resolve_workflow_patch_values(patch_config, request)
+            workflow = apply_workflow_patches(workflow, patches)
+
         workflow["_agency_request"] = request.model_dump(mode="json")
         workflow["_agency_model"] = model.model_dump(mode="json")
         return workflow

@@ -87,6 +87,25 @@ Completed ComfyUI outputs are downloaded through the ComfyUI `/view` endpoint an
 data/assets/{asset_id}/{filename}
 ```
 
+Workflow inputs can be patched per request using `metadata.workflow_patches`. Keys are dotted paths into the ComfyUI workflow JSON, and values name request fields:
+
+```json
+{
+  "prompt": "cinematic perfume advertisement",
+  "width": 720,
+  "height": 1280,
+  "fps": 24,
+  "metadata": {
+    "workflow_patches": {
+      "6.inputs.text": "prompt",
+      "7.inputs.width": "width",
+      "7.inputs.height": "height",
+      "7.inputs.fps": "fps"
+    }
+  }
+}
+```
+
 ## Roadmap
 
 See [docs/ai-ad-agency-build-plan.md](docs/ai-ad-agency-build-plan.md).

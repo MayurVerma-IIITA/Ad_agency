@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import httpx
@@ -129,3 +130,57 @@ async def test_get_result_downloads_output_into_asset_store(tmp_path) -> None:
     assert asset.file_path.parent == tmp_path / asset.asset_id
     assert asset.file_path.name == "ad.mp4"
     assert asset.file_path.read_bytes() == b"video bytes"
+
+
+@pytest.mark.asyncio
+async def test_generate_text_to_video_applies_metadata_workflow_patches() -> None:
+    captured_workflow = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal captured_workflow
+        assert request.url.path == "/prompt"
+        captured_workflow = json.loads(request.content)["prompt"]
+        return httpx.Response(200, json={"prompt_id": "prompt_123"})
+
+    provider = WanProvider(
+        ComfyUIClient("http://testserver", transport=httpx.MockTransport(handler)),
+        workflow_template={
+            "6": {"inputs": {"text": "old prompt"}},
+            "7": {"inputs": {"width": 512, "height": 512, "fps": 12}},
+        },
+        model_registry=ModelRegistry(
+            [
+                ModelRegistryEntry(
+                    model_id="wan_test",
+                    name="Wan Test",
+                    provider="wan",
+                    type="video",
+                    capabilities=["text_to_video"],
+                    license="Apache-2.0",
+                    commercial_status=CommercialStatus.APPROVED,
+                )
+            ]
+        ),
+    )
+
+    await provider.generate_text_to_video(
+        VideoGenerationRequest(
+            prompt="cinematic perfume advertisement",
+            width=720,
+            height=1280,
+            fps=24,
+            metadata={
+                "workflow_patches": {
+                    "6.inputs.text": "prompt",
+                    "7.inputs.width": "width",
+                    "7.inputs.height": "height",
+                    "7.inputs.fps": "fps",
+                }
+            },
+        )
+    )
+
+    assert captured_workflow["6"]["inputs"]["text"] == "cinematic perfume advertisement"
+    assert captured_workflow["7"]["inputs"]["width"] == 720
+    assert captured_workflow["7"]["inputs"]["height"] == 1280
+    assert captured_workflow["7"]["inputs"]["fps"] == 24

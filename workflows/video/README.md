@@ -15,3 +15,5 @@ Suggested names:
 - `wan-image-to-video.json`
 
 The backend currently expects a single workflow path from `WAN_WORKFLOW_PATH`.
+
+After exporting a real workflow, inspect the node IDs and provide request-time `metadata.workflow_patches` for values that should change per generation, such as prompt, negative prompt, width, height, fps, and duration.
