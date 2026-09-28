@@ -10,6 +10,7 @@ from backend.model_registry import ModelRegistry
 from backend.models import ModelRegistryEntry
 from backend.models import AssetRecord, JobRecord, JobStatus, VideoGenerationRequest
 from backend.providers.base import VideoProvider
+from backend.storage import LocalAssetStore
 
 
 class WanProvider(VideoProvider):
@@ -26,10 +27,12 @@ class WanProvider(VideoProvider):
         comfyui: ComfyUIClient,
         workflow_template: dict[str, Any] | None = None,
         model_registry: ModelRegistry | None = None,
+        asset_store: LocalAssetStore | None = None,
     ) -> None:
         self.comfyui = comfyui
         self.workflow_template = workflow_template or {}
         self.model_registry = model_registry
+        self.asset_store = asset_store
 
     async def generate_text_to_video(self, request: VideoGenerationRequest) -> JobRecord:
         model = self._select_model(request)
@@ -72,7 +75,7 @@ class WanProvider(VideoProvider):
         subfolder = output.get("subfolder") or ""
         file_type = _asset_type_from_filename(filename)
 
-        return AssetRecord(
+        asset = AssetRecord(
             type=file_type,
             file_path=Path("comfyui") / str(output.get("type", "output")) / subfolder / filename,
             provider=self.name,
@@ -88,6 +91,16 @@ class WanProvider(VideoProvider):
             },
             license=model.license,
         )
+
+        if not self.asset_store:
+            return asset
+
+        content = await self.comfyui.download_output_file(
+            filename=filename,
+            subfolder=subfolder,
+            file_type=str(output.get("type", "output")),
+        )
+        return self.asset_store.save_bytes(asset, filename, content)
 
     def _build_workflow(self, request: VideoGenerationRequest, model: ModelRegistryEntry) -> dict[str, Any]:
         if not self.workflow_template:

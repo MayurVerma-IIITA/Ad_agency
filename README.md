@@ -81,6 +81,12 @@ Model metadata lives in `models/registry.json`. Video requests default to:
 
 If `commercial_use` is `true`, the registry selector rejects models marked `unknown` or `research_only`.
 
+Completed ComfyUI outputs are downloaded through the ComfyUI `/view` endpoint and copied into local asset storage:
+
+```text
+data/assets/{asset_id}/{filename}
+```
+
 ## Roadmap
 
 See [docs/ai-ad-agency-build-plan.md](docs/ai-ad-agency-build-plan.md).

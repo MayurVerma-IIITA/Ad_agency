@@ -9,6 +9,7 @@ from backend.comfy.client import ComfyUIClient
 from backend.model_registry import ModelRegistry
 from backend.models import CommercialStatus, ModelRegistryEntry, VideoGenerationRequest
 from backend.providers.wan import WanProvider
+from backend.storage import LocalAssetStore
 
 
 @pytest.mark.asyncio
@@ -75,3 +76,56 @@ async def test_get_result_maps_comfyui_mp4_to_video_asset() -> None:
     assert asset.parameters["request"]["negative_prompt"] == "low quality"
     assert asset.parameters["request"]["duration"] == 7
     assert asset.parameters["model"]["commercial_status"] == "approved"
+
+
+@pytest.mark.asyncio
+async def test_get_result_downloads_output_into_asset_store(tmp_path) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/history/prompt_123":
+            return httpx.Response(
+                200,
+                json={
+                    "prompt_123": {
+                        "outputs": {
+                            "9": {
+                                "gifs": [
+                                    {
+                                        "filename": "ad.mp4",
+                                        "subfolder": "",
+                                        "type": "output",
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+            )
+        if request.url.path == "/view":
+            assert request.url.params["filename"] == "ad.mp4"
+            return httpx.Response(200, content=b"video bytes")
+        return httpx.Response(404)
+
+    provider = WanProvider(
+        ComfyUIClient("http://testserver", transport=httpx.MockTransport(handler)),
+        workflow_template={"1": {"class_type": "Mock"}},
+        model_registry=ModelRegistry(
+            [
+                ModelRegistryEntry(
+                    model_id="wan_test",
+                    name="Wan Test",
+                    provider="wan",
+                    type="video",
+                    capabilities=["text_to_video"],
+                    license="Apache-2.0",
+                    commercial_status=CommercialStatus.APPROVED,
+                )
+            ]
+        ),
+        asset_store=LocalAssetStore(tmp_path),
+    )
+
+    asset = await provider.get_result("prompt_123", VideoGenerationRequest(prompt="ad"))
+
+    assert asset.file_path.parent == tmp_path / asset.asset_id
+    assert asset.file_path.name == "ad.mp4"
+    assert asset.file_path.read_bytes() == b"video bytes"

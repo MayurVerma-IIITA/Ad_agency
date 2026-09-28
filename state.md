@@ -28,6 +28,8 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 - Added a JSON model registry with license and commercial-use metadata.
 - Added model selection checks that reject unknown/research-only models for commercial requests.
 - Added `GET /models` for registry inspection.
+- Added ComfyUI `/view` output download support.
+- Added local asset storage writes under `data/assets/{asset_id}/`.
 
 ## In Progress
 
@@ -44,7 +46,7 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 - Add real ComfyUI `/prompt`, history, and output retrieval behavior.
 - Expose the working flow through a real MCP server.
 - Add integration tests once a ComfyUI endpoint is available.
-- Download or copy real ComfyUI output files into durable local storage.
+- Validate the durable asset storage path against a real ComfyUI/Wan output file.
 - Replace placeholder Wan license metadata after source/license verification.
 - Add provider routing once there is more than one real model/provider.
 
@@ -65,3 +67,4 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 - Local smoke test passed using `scripts.mock_comfyui:app` and `workflows/video/mock-video.json`.
 - Smoke test covered `POST /generate/video`, `GET /jobs/{job_id}`, and `GET /assets/{asset_id}`.
 - API startup and `GET /models` smoke-tested against `models/registry.json`.
+- Mock API smoke test verified `mock-output.mp4` was written under `data/assets/{asset_id}/`.

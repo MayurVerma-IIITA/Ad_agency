@@ -42,3 +42,19 @@ async def test_get_history_returns_payload() -> None:
     history = await client.get_history("prompt_123")
 
     assert "prompt_123" in history
+
+
+@pytest.mark.asyncio
+async def test_download_output_file_reads_view_content() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/view"
+        assert request.url.params["filename"] == "ad.mp4"
+        assert request.url.params["subfolder"] == "campaign-a"
+        assert request.url.params["type"] == "output"
+        return httpx.Response(200, content=b"video bytes")
+
+    client = ComfyUIClient("http://testserver", transport=httpx.MockTransport(handler))
+
+    content = await client.download_output_file("ad.mp4", subfolder="campaign-a", file_type="output")
+
+    assert content == b"video bytes"

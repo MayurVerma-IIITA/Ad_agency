@@ -3,6 +3,7 @@ from __future__ import annotations
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel
 
 
@@ -45,3 +46,10 @@ async def history(prompt_id: str) -> dict:
     if not job:
         raise HTTPException(status_code=404, detail="prompt not found")
     return {prompt_id: job}
+
+
+@app.get("/view")
+async def view(filename: str, subfolder: str = "", type: str = "output") -> Response:
+    if filename != "mock-output.mp4" or type != "output":
+        raise HTTPException(status_code=404, detail="output not found")
+    return Response(content=b"mock mp4 bytes", media_type="video/mp4")

@@ -35,3 +35,14 @@ class ComfyUIClient:
             response = await client.get(f"{self.base_url}/history/{prompt_id}")
             response.raise_for_status()
             return response.json()
+
+    async def download_output_file(self, filename: str, subfolder: str = "", file_type: str = "output") -> bytes:
+        params = {
+            "filename": filename,
+            "subfolder": subfolder,
+            "type": file_type,
+        }
+        async with httpx.AsyncClient(timeout=120, transport=self.transport) as client:
+            response = await client.get(f"{self.base_url}/view", params=params)
+            response.raise_for_status()
+            return response.content
