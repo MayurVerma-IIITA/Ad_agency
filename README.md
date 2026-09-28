@@ -109,3 +109,7 @@ Workflow inputs can be patched per request using `metadata.workflow_patches`. Ke
 ## Roadmap
 
 See [docs/ai-ad-agency-build-plan.md](docs/ai-ad-agency-build-plan.md).
+
+## Wan Setup
+
+See [docs/setup-comfyui-wan.md](docs/setup-comfyui-wan.md) for the GPU-side ComfyUI/Wan setup flow.

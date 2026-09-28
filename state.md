@@ -31,6 +31,9 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 - Added ComfyUI `/view` output download support.
 - Added local asset storage writes under `data/assets/{asset_id}/`.
 - Added request-driven ComfyUI workflow patching through `metadata.workflow_patches`.
+- Added official Wan 2.2 5B TI2V UI workflow template.
+- Added ComfyUI/Wan setup guide and workflow inspection script.
+- Updated Wan registry metadata to Apache-2.0 / commercial approved, with production verification note.
 
 ## In Progress
 
@@ -44,6 +47,7 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 
 - Connect `WanProvider` to a real ComfyUI workflow JSON.
 - Decide first free GPU execution environment.
+- Export `workflows/video/wan-text-to-video-api.json` from ComfyUI after a successful manual generation.
 - Add real ComfyUI `/prompt`, history, and output retrieval behavior.
 - Expose the working flow through a real MCP server.
 - Add integration tests once a ComfyUI endpoint is available.
@@ -70,3 +74,4 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 - Smoke test covered `POST /generate/video`, `GET /jobs/{job_id}`, and `GET /assets/{asset_id}`.
 - API startup and `GET /models` smoke-tested against `models/registry.json`.
 - Mock API smoke test verified `mock-output.mp4` was written under `data/assets/{asset_id}/`.
+- `.\.venv\Scripts\python.exe scripts\inspect_workflow.py workflows\video\wan-text-to-video-ui.json` succeeds.
