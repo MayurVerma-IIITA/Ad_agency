@@ -23,5 +23,5 @@ class VideoProvider(ABC):
         """Fetch provider-level job status."""
 
     @abstractmethod
-    async def get_result(self, provider_job_id: str) -> AssetRecord:
+    async def get_result(self, provider_job_id: str, request: VideoGenerationRequest) -> AssetRecord:
         """Fetch the completed provider result as an asset record."""

@@ -26,14 +26,17 @@ class FakeVideoProvider(VideoProvider):
             asset_id="asset_123",
         )
 
-    async def get_result(self, provider_job_id: str) -> AssetRecord:
+    async def get_result(self, provider_job_id: str, request: VideoGenerationRequest) -> AssetRecord:
         return AssetRecord(
             type="video",
             file_path=Path("comfyui/output/mock-output.mp4"),
             provider=self.name,
             model="fake",
-            prompt="cinematic perfume ad",
-            parameters={"provider_job_id": provider_job_id},
+            prompt=request.prompt,
+            parameters={
+                "provider_job_id": provider_job_id,
+                "request": request.model_dump(mode="json"),
+            },
         )
 
 
@@ -72,6 +75,8 @@ async def test_refresh_job_registers_completed_asset() -> None:
     assert asset is not None
     assert asset.type == "video"
     assert asset.file_path == Path("comfyui/output/mock-output.mp4")
+    assert asset.prompt == "cinematic perfume ad"
+    assert asset.parameters["request"]["duration"] == 5
 
 
 @pytest.mark.asyncio

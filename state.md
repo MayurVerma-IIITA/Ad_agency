@@ -24,6 +24,7 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 - Added API endpoints to list and fetch asset records.
 - Added Wan provider output parsing from ComfyUI history into `AssetRecord`.
 - Verified mock API flow through asset lookup.
+- Preserved original generation prompt and request parameters on completed asset records.
 
 ## In Progress
 
@@ -41,7 +42,8 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 - Expose the working flow through a real MCP server.
 - Add integration tests once a ComfyUI endpoint is available.
 - Download or copy real ComfyUI output files into durable local storage.
-- Preserve original request prompt and generation parameters on asset records.
+- Add a model registry with license metadata for Wan and future providers.
+- Add a production-safety flag to prevent research-only models from being selected for client work.
 
 ## Blockers
 

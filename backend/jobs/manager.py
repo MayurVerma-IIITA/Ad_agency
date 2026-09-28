@@ -45,7 +45,7 @@ class JobManager:
         provider_status = await self.video_provider.get_status(job.provider_job_id)
         asset_id = job.asset_id
         if provider_status.status == JobStatus.COMPLETED and not asset_id:
-            asset = await self.video_provider.get_result(job.provider_job_id)
+            asset = await self.video_provider.get_result(job.provider_job_id, job.request)
             self._assets[asset.asset_id] = asset
             asset_id = asset.asset_id
 
