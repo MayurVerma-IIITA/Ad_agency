@@ -43,11 +43,32 @@ Run the API:
 uvicorn backend.api.main:app --reload
 ```
 
+Run the mock ComfyUI service in a second terminal:
+
+```powershell
+uvicorn scripts.mock_comfyui:app --port 8188 --reload
+```
+
+The mock service is only for exercising API/job orchestration before a real GPU-backed ComfyUI endpoint is available.
+
+For local smoke testing without a real Wan workflow, set:
+
+```powershell
+$env:WAN_WORKFLOW_PATH = "./workflows/video/mock-video.json"
+uvicorn backend.api.main:app --reload
+```
+
 ## Configuration
 
 Copy `.env.example` to `.env` and adjust values as needed.
 
 The initial implementation defaults to local asset storage under `./data/assets`.
+
+To point the backend at a real exported ComfyUI workflow, set:
+
+```powershell
+WAN_WORKFLOW_PATH=./workflows/video/wan-text-to-video.json
+```
 
 ## Roadmap
 

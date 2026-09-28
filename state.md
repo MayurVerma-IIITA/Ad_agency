@@ -17,6 +17,9 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 - Verified the current job orchestration tests pass.
 - Initialized a local Git repository.
 - Added workflow JSON loading and provider construction from settings.
+- Added a mock ComfyUI service for local API smoke testing.
+- Added ComfyUI client tests and a mock video workflow.
+- Verified mock API flow: submit video job, receive provider job ID, refresh status to completed.
 
 ## In Progress
 
@@ -33,7 +36,7 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 - Add real ComfyUI `/prompt`, history, and output retrieval behavior.
 - Expose the working flow through a real MCP server.
 - Add integration tests once a ComfyUI endpoint is available.
-- Add a Git remote and push once the remote URL is available.
+- Map real ComfyUI output files to durable asset records.
 
 ## Blockers
 
@@ -43,9 +46,10 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 ## Git / Deployment
 
 - Local Git repository initialized.
-- No remote is configured yet.
+- Remote `origin` is configured at `https://github.com/MayurVerma-IIITA/Ad_agency.git`.
 - No deployment exists.
 
 ## Verification
 
-- `.\.venv\Scripts\python.exe -m pytest` passes with 5 tests.
+- `.\.venv\Scripts\python.exe -m pytest` passes with 8 tests.
+- Local smoke test passed using `scripts.mock_comfyui:app` and `workflows/video/mock-video.json`.
