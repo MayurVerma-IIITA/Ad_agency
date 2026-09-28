@@ -22,6 +22,26 @@ class VideoMode(StrEnum):
     IMAGE_TO_VIDEO = "image_to_video"
 
 
+class CommercialStatus(StrEnum):
+    APPROVED = "approved"
+    CONDITIONAL = "conditional"
+    RESEARCH_ONLY = "research_only"
+    UNKNOWN = "unknown"
+
+
+class ModelRegistryEntry(BaseModel):
+    model_id: str
+    name: str
+    provider: str
+    type: Literal["video", "image", "audio", "editing"]
+    capabilities: list[str]
+    license: str
+    commercial_status: CommercialStatus
+    enabled: bool = True
+    notes: str = ""
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
 class VideoGenerationRequest(BaseModel):
     prompt: str = Field(min_length=1)
     negative_prompt: str = ""
@@ -31,6 +51,7 @@ class VideoGenerationRequest(BaseModel):
     fps: int = Field(default=24, ge=1, le=60)
     mode: VideoMode = VideoMode.TEXT_TO_VIDEO
     model: str = "auto"
+    commercial_use: bool = False
     image_asset_id: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 

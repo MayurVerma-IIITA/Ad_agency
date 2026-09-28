@@ -70,6 +70,17 @@ To point the backend at a real exported ComfyUI workflow, set:
 WAN_WORKFLOW_PATH=./workflows/video/wan-text-to-video.json
 ```
 
+Model metadata lives in `models/registry.json`. Video requests default to:
+
+```json
+{
+  "model": "auto",
+  "commercial_use": false
+}
+```
+
+If `commercial_use` is `true`, the registry selector rejects models marked `unknown` or `research_only`.
+
 ## Roadmap
 
 See [docs/ai-ad-agency-build-plan.md](docs/ai-ad-agency-build-plan.md).

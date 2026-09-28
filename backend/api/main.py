@@ -4,12 +4,14 @@ from fastapi import FastAPI, HTTPException
 
 from backend.config import get_settings
 from backend.jobs import JobManager
-from backend.models import AssetRecord, JobRecord, VideoGenerationRequest
+from backend.model_registry import ModelRegistry
+from backend.models import AssetRecord, JobRecord, ModelRegistryEntry, VideoGenerationRequest
 from backend.providers import build_video_provider
 
 settings = get_settings()
 provider = build_video_provider(settings)
 jobs = JobManager(provider)
+model_registry = ModelRegistry.from_file(settings.model_registry_path)
 
 app = FastAPI(title="AI Ad Agency API")
 
@@ -43,3 +45,8 @@ async def get_asset(asset_id: str) -> AssetRecord:
     if not asset:
         raise HTTPException(status_code=404, detail="asset not found")
     return asset
+
+
+@app.get("/models", response_model=list[ModelRegistryEntry])
+async def list_models() -> list[ModelRegistryEntry]:
+    return model_registry.list()

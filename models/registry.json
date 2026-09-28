@@ -1,0 +1,22 @@
+{
+  "models": [
+    {
+      "model_id": "wan_2_2_ti2v_5b",
+      "name": "Wan 2.2 TI2V-5B",
+      "provider": "wan",
+      "type": "video",
+      "capabilities": [
+        "text_to_video",
+        "image_to_video"
+      ],
+      "license": "unknown",
+      "commercial_status": "unknown",
+      "enabled": true,
+      "notes": "License and commercial-use terms must be verified before client production.",
+      "metadata": {
+        "workflow": "ComfyUI",
+        "recommended_first_use": "development_only"
+      }
+    }
+  ]
+}

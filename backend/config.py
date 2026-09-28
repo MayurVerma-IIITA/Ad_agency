@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     comfyui_base_url: str = Field(default="http://127.0.0.1:8188", alias="COMFYUI_BASE_URL")
     video_provider: str = Field(default="wan", alias="VIDEO_PROVIDER")
     wan_workflow_path: Path | None = Field(default=None, alias="WAN_WORKFLOW_PATH")
+    model_registry_path: Path = Field(default=Path("./models/registry.json"), alias="MODEL_REGISTRY_PATH")
 
 
 @lru_cache

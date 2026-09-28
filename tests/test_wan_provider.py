@@ -6,7 +6,8 @@ import httpx
 import pytest
 
 from backend.comfy.client import ComfyUIClient
-from backend.models import VideoGenerationRequest
+from backend.model_registry import ModelRegistry
+from backend.models import CommercialStatus, ModelRegistryEntry, VideoGenerationRequest
 from backend.providers.wan import WanProvider
 
 
@@ -36,6 +37,19 @@ async def test_get_result_maps_comfyui_mp4_to_video_asset() -> None:
     provider = WanProvider(
         ComfyUIClient("http://testserver", transport=httpx.MockTransport(handler)),
         workflow_template={"1": {"class_type": "Mock"}},
+        model_registry=ModelRegistry(
+            [
+                ModelRegistryEntry(
+                    model_id="wan_test",
+                    name="Wan Test",
+                    provider="wan",
+                    type="video",
+                    capabilities=["text_to_video"],
+                    license="Apache-2.0",
+                    commercial_status=CommercialStatus.APPROVED,
+                )
+            ]
+        ),
     )
 
     request = VideoGenerationRequest(
@@ -52,10 +66,12 @@ async def test_get_result_maps_comfyui_mp4_to_video_asset() -> None:
     assert asset.type == "video"
     assert asset.file_path == Path("comfyui/output/campaign-a/ad.mp4")
     assert asset.provider == "wan"
-    assert asset.model == "wan"
+    assert asset.model == "wan_test"
+    assert asset.license == "Apache-2.0"
     assert asset.prompt == "cinematic perfume advertisement"
     assert asset.parameters["provider_job_id"] == "prompt_123"
     assert asset.parameters["node_id"] == "9"
     assert asset.parameters["output_kind"] == "gifs"
     assert asset.parameters["request"]["negative_prompt"] == "low quality"
     assert asset.parameters["request"]["duration"] == 7
+    assert asset.parameters["model"]["commercial_status"] == "approved"

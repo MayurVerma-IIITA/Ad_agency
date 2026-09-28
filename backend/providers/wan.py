@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import Any
 
 from backend.comfy.client import ComfyUIClient
+from backend.model_registry import ModelRegistry
+from backend.models import ModelRegistryEntry
 from backend.models import AssetRecord, JobRecord, JobStatus, VideoGenerationRequest
 from backend.providers.base import VideoProvider
 
@@ -19,12 +21,19 @@ class WanProvider(VideoProvider):
 
     name = "wan"
 
-    def __init__(self, comfyui: ComfyUIClient, workflow_template: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self,
+        comfyui: ComfyUIClient,
+        workflow_template: dict[str, Any] | None = None,
+        model_registry: ModelRegistry | None = None,
+    ) -> None:
         self.comfyui = comfyui
         self.workflow_template = workflow_template or {}
+        self.model_registry = model_registry
 
     async def generate_text_to_video(self, request: VideoGenerationRequest) -> JobRecord:
-        workflow = self._build_workflow(request)
+        model = self._select_model(request)
+        workflow = self._build_workflow(request, model)
         provider_job_id = await self.comfyui.submit_prompt(workflow)
         return JobRecord(
             status=JobStatus.RUNNING,
@@ -35,7 +44,8 @@ class WanProvider(VideoProvider):
     async def generate_image_to_video(self, request: VideoGenerationRequest) -> JobRecord:
         if not request.image_asset_id:
             raise ValueError("image_asset_id is required for image-to-video generation")
-        workflow = self._build_workflow(request)
+        model = self._select_model(request)
+        workflow = self._build_workflow(request, model)
         provider_job_id = await self.comfyui.submit_prompt(workflow)
         return JobRecord(
             status=JobStatus.RUNNING,
@@ -55,6 +65,7 @@ class WanProvider(VideoProvider):
         )
 
     async def get_result(self, provider_job_id: str, request: VideoGenerationRequest) -> AssetRecord:
+        model = self._select_model(request)
         history = await self.comfyui.get_history(provider_job_id)
         output = _first_output_file(history, provider_job_id)
         filename = output["filename"]
@@ -65,7 +76,7 @@ class WanProvider(VideoProvider):
             type=file_type,
             file_path=Path("comfyui") / str(output.get("type", "output")) / subfolder / filename,
             provider=self.name,
-            model="wan",
+            model=model.model_id,
             prompt=request.prompt,
             parameters={
                 "provider_job_id": provider_job_id,
@@ -73,17 +84,33 @@ class WanProvider(VideoProvider):
                 "output_kind": output.get("output_kind"),
                 "comfyui_type": output.get("type"),
                 "request": request.model_dump(mode="json"),
+                "model": model.model_dump(mode="json"),
             },
-            license="unknown",
+            license=model.license,
         )
 
-    def _build_workflow(self, request: VideoGenerationRequest) -> dict[str, Any]:
+    def _build_workflow(self, request: VideoGenerationRequest, model: ModelRegistryEntry) -> dict[str, Any]:
         if not self.workflow_template:
             raise ValueError("Wan workflow template is not configured")
 
         workflow = copy.deepcopy(self.workflow_template)
         workflow["_agency_request"] = request.model_dump(mode="json")
+        workflow["_agency_model"] = model.model_dump(mode="json")
         return workflow
+
+    def _select_model(self, request: VideoGenerationRequest) -> ModelRegistryEntry:
+        if self.model_registry:
+            return self.model_registry.select_video_model(request, provider=self.name)
+
+        return ModelRegistryEntry(
+            model_id="wan",
+            name="Wan",
+            provider=self.name,
+            type="video",
+            capabilities=[request.mode.value],
+            license="unknown",
+            commercial_status="unknown",
+        )
 
 
 def _first_output_file(history: dict[str, Any], provider_job_id: str) -> dict[str, Any]:
