@@ -113,3 +113,5 @@ See [docs/ai-ad-agency-build-plan.md](docs/ai-ad-agency-build-plan.md).
 ## Wan Setup
 
 See [docs/setup-comfyui-wan.md](docs/setup-comfyui-wan.md) for the GPU-side ComfyUI/Wan setup flow.
+
+If you do not have a local NVIDIA GPU, use [docs/colab-comfyui-wan.md](docs/colab-comfyui-wan.md).

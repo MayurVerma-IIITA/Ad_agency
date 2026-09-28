@@ -34,6 +34,7 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 - Added official Wan 2.2 5B TI2V UI workflow template.
 - Added ComfyUI/Wan setup guide and workflow inspection script.
 - Updated Wan registry metadata to Apache-2.0 / commercial approved, with production verification note.
+- Added a Colab-oriented ComfyUI/Wan setup notebook and guide.
 
 ## In Progress
 
@@ -48,6 +49,7 @@ Started the minimal repository scaffold for the AI Ad Agency MCP project.
 - Connect `WanProvider` to a real ComfyUI workflow JSON.
 - Decide first free GPU execution environment.
 - Export `workflows/video/wan-text-to-video-api.json` from ComfyUI after a successful manual generation.
+- Run the Colab notebook or another GPU setup to produce the first manual Wan MP4.
 - Add real ComfyUI `/prompt`, history, and output retrieval behavior.
 - Expose the working flow through a real MCP server.
 - Add integration tests once a ComfyUI endpoint is available.
